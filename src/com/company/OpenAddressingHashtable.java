@@ -1,15 +1,25 @@
 package com.company;
 
+import java.util.Formatter;
+import java.util.NoSuchElementException;
+
 public class OpenAddressingHashtable<T> implements IHashtable<T> {
 
 
     private T[] table = null;
-    private int step = 3;
+    private boolean isDeleted[] = null;
+    private int step = 1;
+    private boolean uniqueMode = false;
 
     public OpenAddressingHashtable(int powSize){
         table = (T[]) new Object[(int)Math.pow(2, powSize)];
+        isDeleted = new boolean[(int)Math.pow(2, powSize)];
     }
 
+    public OpenAddressingHashtable(int powSize, boolean uniqueMode){
+        this(powSize);
+        this.uniqueMode = uniqueMode;
+    }
     //шаг не(не желательно) должен быть кратен размеру таблицы
     public void setStep(int step){
         this.step = step;
@@ -20,15 +30,25 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
         if (isNull()){
             throw new NullPointerException("Table is null");
         }
+
+        if (uniqueMode && contains(value)){
+            throw new Exception("Element is already presented");
+        }
+
+
         int hash = Math.abs(value.hashCode());
         int offset = 0;
-        while(table[(hash + offset) % table.length] != null){
+        int index = (hash + offset) % table.length;
+        int startingIndex = index;
+        while(isDeleted[index] == false && table[index] != null){
             offset += step;
-            if ((hash + offset) % table.length == hash % table.length){
+            index = (hash + offset) % table.length;
+            if (index == startingIndex){
                 throw new OutOfMemoryError("Table is full");
             }
         }
         table[(hash + offset) % table.length] = value;
+        isDeleted[index] = false;
     }
 
     @Override
@@ -36,23 +56,24 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
         if (isNull()){
             throw new NullPointerException("Table is null");
         }
+        if(!contains(value)){
+            throw new NoSuchElementException("Element not found");
+        }
         int hash = Math.abs(value.hashCode());
         int offset = 0;
-        int indexDel;
+        int indexDel = -1;
+        int index = (hash + offset) % table.length;
+        int startingIndex = index;
         //узнаем индекс элемента на удаление
-        while(table[(hash + offset) % table.length] != null){
-            if (table[(hash + offset) % table.length].equals(value)) {
-                indexDel = (hash + offset) % table.length;
+        while(table[index] != null){
+            if (table[index].equals(value) && isDeleted[index] == false) {
                 break;
             }
             offset += step;
+            index = (hash + offset) % table.length;
         }
+        isDeleted[index] = true;
 
-        //перестраиваем таблицу с заглядыванием вперёд на шаг
-        while(table[(hash + offset) % table.length] != null){
-            table[(hash + offset) % table.length] = table[(hash + offset + step) % table.length];
-            offset += step;
-        }
     }
 
     @Override
@@ -62,10 +83,16 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
         }
         int hash = Math.abs(value.hashCode());
         int offset = 0;
-        while(table[(hash + offset) % table.length] != null){
-            if (table[(hash + offset) % table.length].equals(value))
+        int index = (hash + offset) % table.length;
+        int startingIndex = index;
+        while(table[index] != null){
+            if (isDeleted[index] == false && table[index].equals(value))
                 return true;
             offset += step;
+            index = (hash + offset) % table.length;
+            if (index == startingIndex){
+                return false;
+            }
         }
         return false;
     }
@@ -74,9 +101,8 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
     public void print() {
         for(int i = 0; i < table.length; i++){
             if (table[i] != null)
-                System.out.println("Table[" + i + "] = " + table[i]);
-            else
-                System.out.println("Table[" + i + "] = null");
+                System.out.println("Table[" + i + "] = " + table[i] + " IsDeleted = " + isDeleted[i]);
+
         }
     }
 

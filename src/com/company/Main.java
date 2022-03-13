@@ -8,10 +8,15 @@ public class Main {
         OpenAddressingHashtable<String> hashtable = new OpenAddressingHashtable<String>(6);
 
         Random rng = new Random();
-        for(int i = 0; i < 4; i++){
-            hashtable.add("Petya");
+        for(int i = 0; i < 20; i++){
+            hashtable.add(generateString(rng, "qwe", 3));
         }
-        System.out.println(hashtable.contains("Petya"));
+        String randomStr = generateString(rng, "qwe", 3);
+        System.out.println(randomStr);
+
+        hashtable.remove(randomStr);
+        hashtable.remove(randomStr);
+        hashtable.remove(randomStr);
         hashtable.print();
     }
     public static String generateString(Random rng, String characters, int length)

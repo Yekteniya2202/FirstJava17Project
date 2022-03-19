@@ -38,16 +38,10 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
     }
 
     @Override
-    public void remove(T value) throws Exception{
+    public void remove(T value) throws NoSuchElementException{
         if (isEmpty())
             throw new NoSuchElementException("Element" + value.toString() + "not found");
 
-        //если начало списка
-        if (front.data.equals(value)){
-            front = front.next;
-            front.prev = null;
-            return;
-        }
 
         //Ищем
         ListNode<T> tmp = front;
@@ -59,12 +53,19 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
         if(tmp == null){
             throw new NoSuchElementException("Element" + value.toString() + "not found");
         }
+
+
         //нашли
+        size--;
         if(tmp.next == null) {
             tmp.prev.next = null;
             return;
         }
         if(tmp.equals(front)){
+            if (size == 1){
+                front = null;
+                return;
+            }
             front = tmp.next;
             front.prev = null;
             return;
@@ -72,8 +73,6 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
 
         tmp.prev.next = tmp.next;
         tmp.next.prev = tmp.prev;
-
-        size--;
 
     }
 
@@ -89,7 +88,7 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
             tmp = tmp.next;
         }
 
-        return tmp == null ? false : true;
+        return tmp != null;
     }
 
     @Override
@@ -131,5 +130,10 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
     @Override
     public int size() {
         return size;
+    }
+
+    @Override
+    public ILinkedList<T> getEmptyInstanse() {
+        return new DoublyLinkedList<T>();
     }
 }

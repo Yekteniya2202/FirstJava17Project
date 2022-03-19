@@ -9,5 +9,5 @@ public interface ILinkedList<T> {
     void printForward();
     void printBackward();
     int size();
-
+    ILinkedList<T> getEmptyInstanse();
 }

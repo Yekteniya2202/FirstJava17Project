@@ -5,17 +5,16 @@ public class ChainHashtable<T> implements IHashtable<T> {
 
     private ILinkedList<T>[] chains = null;
     private boolean uniqueMode = false;
-
-    public ChainHashtable(int size){
+    public ChainHashtable(int size, ILinkedList<T> copyOf){
         chains = new ILinkedList[size];
         for(int i = 0; i < chains.length; i++){
             //как прокинуть тип?
-            chains[i] = new DoublyLinkedList<T>();
+            chains[i] = copyOf.getEmptyInstanse();
         }
     }
 
-    public ChainHashtable(boolean uniqueMode, int size){
-        this(size);
+    public ChainHashtable(boolean uniqueMode, ILinkedList<T> copyOf, int size){
+        this(size, copyOf);
         this.uniqueMode = uniqueMode;
     }
 
@@ -28,6 +27,7 @@ public class ChainHashtable<T> implements IHashtable<T> {
         if (uniqueMode && chains[hash % chains.length].contains(value)){
             throw new Exception("Such element is already presented");
         }
+
 
         chains[hash % chains.length].addEnd(value);
     }

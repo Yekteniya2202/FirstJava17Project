@@ -1,17 +1,20 @@
 package com.company;
 
-import java.util.Formatter;
 import java.util.NoSuchElementException;
 
 public class OpenAddressingHashtable<T> implements IHashtable<T> {
 
 
     private T[] table = null;
-    private boolean isDeleted[] = null;
+    private boolean[] isDeleted = null;
     private int step = 1;
     private boolean uniqueMode = false;
+    int filledSize = 0;
+    double filledKoef = 0;
+    int powSize = 0;
 
     public OpenAddressingHashtable(int powSize){
+        this.powSize = powSize;
         table = (T[]) new Object[(int)Math.pow(2, powSize)];
         isDeleted = new boolean[(int)Math.pow(2, powSize)];
     }
@@ -23,6 +26,8 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
     //шаг не(не желательно) должен быть кратен размеру таблицы
     public void setStep(int step){
         this.step = step;
+        //меняя шаг необходимо перестроить таблицу
+        ResizeTable(this.powSize);
     }
 
     @Override
@@ -30,51 +35,84 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
         if (isNull()){
             throw new NullPointerException("Table is null");
         }
-
         if (uniqueMode && contains(value)){
             throw new Exception("Element is already presented");
         }
+        addTo(value, table, isDeleted);
+        filledSize++;
+        StretchOrCompress();
+    }
 
-
+    private void addTo(T value, T[] destTable, boolean[] destIsDeleted) throws OutOfMemoryError {
         int hash = Math.abs(value.hashCode());
         int offset = 0;
-        int index = (hash + offset) % table.length;
+        int index = (hash + offset) % destTable.length;
         int startingIndex = index;
-        while(isDeleted[index] == false && table[index] != null){
+        while(destIsDeleted[index] == false && destTable[index] != null){
             offset += step;
-            index = (hash + offset) % table.length;
+            index = (hash + offset) % destTable.length;
             if (index == startingIndex){
                 throw new OutOfMemoryError("Table is full");
             }
         }
-        table[(hash + offset) % table.length] = value;
-        isDeleted[index] = false;
+        destTable[(hash + offset) % destTable.length] = value;
+        destIsDeleted[index] = false;
     }
 
     @Override
-    public void remove(T value) throws Exception {
+    public void remove(T value) throws NullPointerException, NoSuchElementException {
         if (isNull()){
             throw new NullPointerException("Table is null");
         }
         if(!contains(value)){
             throw new NoSuchElementException("Element not found");
         }
+
+        removeFrom(value, table, isDeleted);
+
+        filledSize--;
+        StretchOrCompress();
+    }
+
+    private void removeFrom(T value, T[] srcTable, boolean[] srcIsDeleted) {
         int hash = Math.abs(value.hashCode());
         int offset = 0;
-        int indexDel = -1;
-        int index = (hash + offset) % table.length;
-        int startingIndex = index;
+        int index = (hash + offset) % srcTable.length;
         //узнаем индекс элемента на удаление
-        while(table[index] != null){
-            if (table[index].equals(value) && isDeleted[index] == false) {
+        while(srcTable[index] != null){
+            if (srcTable[index].equals(value) && srcIsDeleted[index] == false) {
                 break;
             }
             offset += step;
-            index = (hash + offset) % table.length;
+            index = (hash + offset) % srcTable.length;
         }
-        isDeleted[index] = true;
-
+        srcIsDeleted[index] = true;
     }
+
+    private void StretchOrCompress() {
+        filledKoef = filledSize * 1.0 / table.length;
+
+        if(filledKoef > 0.7) {
+            ResizeTable(++powSize);
+        }
+        else if (filledKoef < 0.2) {
+            ResizeTable(--powSize);
+        }
+    }
+
+    private void ResizeTable(int powSize){
+        T[] newTable = (T[])new Object[(int)Math.pow(2, powSize)];
+        int l = newTable.length;
+        boolean[] newIsDeleted = new boolean[(int)Math.pow(2, powSize)];
+        for(int i = 0; i < table.length; i++){
+            if (table[i] != null && isDeleted[i] == false){
+                addTo(table[i], newTable, newIsDeleted);
+            }
+        }
+        table = newTable;
+        isDeleted = newIsDeleted;
+    }
+
 
     @Override
     public boolean contains(T value) {
@@ -99,6 +137,9 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
 
     @Override
     public void print() {
+        if (isNull()){
+            throw new NullPointerException("Table is null");
+        }
         for(int i = 0; i < table.length; i++){
             if (table[i] != null)
                 System.out.println("Table[" + i + "] = " + table[i] + " IsDeleted = " + isDeleted[i]);

@@ -40,7 +40,7 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
     @Override
     public void remove(T value) throws NoSuchElementException{
         if (isEmpty())
-            throw new NoSuchElementException("Element" + value.toString() + "not found");
+            throw new NoSuchElementException("Element " + value.toString() + " not found");
 
 
         //Ищем
@@ -51,29 +51,32 @@ public class DoublyLinkedList<T> implements ILinkedList <T>{
 
         //Не нашли
         if(tmp == null){
-            throw new NoSuchElementException("Element" + value.toString() + "not found");
+            throw new NoSuchElementException("Element " + value.toString() + " not found");
         }
 
 
         //нашли
-        size--;
-        if(tmp.next == null) {
-            tmp.prev.next = null;
-            return;
-        }
+
         if(tmp.equals(front)){
             if (size == 1){
                 front = null;
+                size--;
                 return;
             }
             front = tmp.next;
             front.prev = null;
+            size--;
+            return;
+        }
+        if(tmp.next == null) {
+            tmp.prev.next = null;
+            size--;
             return;
         }
 
         tmp.prev.next = tmp.next;
         tmp.next.prev = tmp.prev;
-
+        size--;
     }
 
     @Override

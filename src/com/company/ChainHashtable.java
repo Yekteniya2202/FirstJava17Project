@@ -5,8 +5,10 @@ public class ChainHashtable<T> implements IHashtable<T> {
 
     private ILinkedList<T>[] chains = null;
     private boolean uniqueMode = false;
+    private ILinkedList<T> copyOf;
     public ChainHashtable(int size, ILinkedList<T> copyOf){
         chains = new ILinkedList[size];
+        this.copyOf = copyOf;
         for(int i = 0; i < chains.length; i++){
             //как прокинуть тип?
             chains[i] = copyOf.getEmptyInstanse();
@@ -65,7 +67,10 @@ public class ChainHashtable<T> implements IHashtable<T> {
     }
 
     public void clear(){
-        chains = null;
+        for(int i = 0; i < chains.length; i++){
+            //как прокинуть тип?
+            chains[i] = copyOf.getEmptyInstanse();
+        }
     }
     public int size(){
         return chains.length;

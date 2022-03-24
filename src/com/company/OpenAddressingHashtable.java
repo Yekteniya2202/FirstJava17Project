@@ -136,14 +136,22 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
     }
 
     @Override
+    public void clear() {
+        for(int i = 0; i < table.length; i++){
+            table[i] = null;
+            isDeleted[i] = false;
+        }
+        filledSize = 0;
+        StretchOrCompress();
+    }
+
+    @Override
     public void print() {
         if (isNull()){
             throw new NullPointerException("Table is null");
         }
         for(int i = 0; i < table.length; i++){
-            if (table[i] != null)
-                System.out.println("Table[" + i + "] = " + table[i] + " IsDeleted = " + isDeleted[i]);
-
+            System.out.println("Table[" + i + "] = " + (table[i] != null ? table[i] : "null") + " IsDeleted = " + isDeleted[i]);
         }
     }
 

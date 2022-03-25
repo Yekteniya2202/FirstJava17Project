@@ -34,14 +34,13 @@ public class Main {
 
     private static boolean testAdding(IHashtable<Integer> hashtable) {
         hashtable.clear();
-        for(int i = -100; i < 100; i+=2){
+        for(int i = -100; i < 100; i+=2)
             try {
                 hashtable.add(i);
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
-        }
         for(int i = -100; i < 100; i+=2){
             if(!hashtable.contains(i)){
                 return false;

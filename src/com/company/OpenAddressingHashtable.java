@@ -1,5 +1,7 @@
 package com.company;
 
+import sun.awt.geom.Crossings;
+
 import java.util.NoSuchElementException;
 
 public class OpenAddressingHashtable<T> implements IHashtable<T> {
@@ -24,7 +26,17 @@ public class OpenAddressingHashtable<T> implements IHashtable<T> {
         this.uniqueMode = uniqueMode;
     }
     //шаг не(не желательно) должен быть кратен размеру таблицы
-    public void setStep(int step){
+    public void setStep(int step) throws Exception {
+        if (step <= 0){
+            throw new Exception("Step can not be less than 0");
+        }
+        int size = 1;
+        for(int i = 1; i <= powSize; i++){
+            size *= 2;
+        }
+        if (size % step != 0){
+            throw new Exception("Step is not multiple to size");
+        }
         this.step = step;
         //меняя шаг необходимо перестроить таблицу
         ResizeTable(this.powSize);

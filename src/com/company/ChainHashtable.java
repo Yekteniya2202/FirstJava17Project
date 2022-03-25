@@ -75,4 +75,5 @@ public class ChainHashtable<T> implements IHashtable<T> {
     public int size(){
         return chains.length;
     }
+
 }
